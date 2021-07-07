@@ -1,0 +1,15 @@
+---
+pg:
+    host: myhost
+    user: myuser
+    db: mydb
+    port: 0000
+
+api:
+    host: www.test.com
+    port: 0000
+    user: api_user
+    passwd: api_pass
+
+dirs:
+    in: ./in
