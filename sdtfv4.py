@@ -116,3 +116,12 @@ def sdtf_e():
         ]:
             sdtfv4_e.append(table)
     return sdtfv4_e
+
+
+
+# Using simple function
+print(sdtf_e())
+
+# Using inherited class attributes
+#test = sdtfv4.SdtfV4()
+print(SdtfV4().a())

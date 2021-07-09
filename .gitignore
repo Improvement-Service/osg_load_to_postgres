@@ -21,3 +21,6 @@ venv.bak/
 # Config
 config.ini
 config.yml
+
+# DataIn directory input:
+DataIn/*

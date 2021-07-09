@@ -1,10 +1,14 @@
 ### Test bed for function written elsewhere
 
-import sdtfv4
+import sdtf_processing
+import utils
 
-# Using simple function
-#print(sdtfv4.sdtf_e())
+test = sdtf_processing.SdtfProcessing('DataIn/9010_20210705_E_04.csv', './DataIn', './DataOut')
 
-# Using inherited class attributes
-#test = sdtfv4.SdtfV4()
-print(sdtfv4.SdtfV4().a())
+print(test.filename)
+
+new_dir = test.create_folder()
+
+print(new_dir)
+
+split_files = test.split_sdtf_by_the_record_id(new_dir)
