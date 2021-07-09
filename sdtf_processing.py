@@ -70,12 +70,8 @@ class SdtfProcessing(object):
 
         # The groupby function is used to create chunks of data rows using the record_identifier as the group column.
         for record_identifier, rows in itertools.groupby(reader, lambda row: row[0]):
-            print(rows)
-            print(record_identifier)
-            print(len(record_identifier))
-            print(float(record_identifier))
             tables_output.append(int(record_identifier))
-
+            
             with open(out_folder + '\\{}.csv'.format(record_identifier), 'w', newline='\n', encoding='utf8') as output_file:
 
                 # Check to make sure record identifier in osg_tables
