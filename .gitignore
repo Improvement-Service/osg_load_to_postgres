@@ -24,3 +24,7 @@ config.yml
 
 # DataIn directory input:
 DataIn/*
+in/*
+DataOut/*
+out/*
+DataMgt/*

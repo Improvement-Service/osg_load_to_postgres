@@ -48,7 +48,9 @@ class SdtfProcessing(object):
         out_dir = utils.Utils.create_child_folder(self.filename) 
         return out_dir
     
-    
+    def unzip_sdtf(self):
+        utils.Utils.unzip_file(self.filename)
+
     def split_sdtf_by_the_record_id(self, out_folder):
         """Takes input file and folder, splits input csv into multiple files based on first column
 
