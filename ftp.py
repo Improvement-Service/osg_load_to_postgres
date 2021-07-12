@@ -1,3 +1,5 @@
+import ftp_helpers
+
 class OsgFtp(object):
     def __init__(self, ftp_server, username, password, ftp_ojb=None, file_list=None):
         self.ftp_server = ftp_server
