@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS metadata_29; 
+
 CREATE TABLE metadata_29(
     record_identifier SMALLINT,
     gaz_name CHARACTER VARYING(75),
@@ -13,5 +15,4 @@ CREATE TABLE metadata_29(
     state_code_scheme CHARACTER VARYING(40),
     gaz_date DATE,
     "language" CHARACTER VARYING(3),
-    character_set CHARACTER VARYING(30)
-);
+    character_set CHARACTER VARYING(30

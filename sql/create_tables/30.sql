@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS successor_xrefs_30; 
+
 CREATE TABLE successor_xrefs_30(
     record_identifier SMALLINT,
     change_type CHARACTER VARYING(1) NOT NULL,

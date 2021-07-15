@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS reinstatement_categories_52; 
+
 CREATE TABLE reinstatement_categories_52 (
     record_identifier SMALLINT,
     change_type CHARACTER VARYING(1),

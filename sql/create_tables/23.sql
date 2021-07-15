@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS application_xrefs_23; 
+
 CREATE TABLE application_xrefs_23 (
     record_identifier SMALLINT,
     change_type CHARACTER VARYING(1) NOT NULL,

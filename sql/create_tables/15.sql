@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS street_descriptions_15; 
+
 CREATE TABLE street_descriptions_15(
     record_identifier SMALLINT,
     change_type CHARACTER VARYING(1) NOT NULL,
@@ -9,5 +11,5 @@ CREATE TABLE street_descriptions_15(
     island CHARACTER VARYING(30),
     administrative_area CHARACTER VARYING(30),
     language CHARACTER VARYING(3),
-CONSTRAINT streetdescs_fk FOREIGN KEY(usrn) REFERENCES streets(usrn)
+CONSTRAINT streetdescs_fk FOREIGN KEY(usrn) REFERENCES streets_11(usrn)
 );

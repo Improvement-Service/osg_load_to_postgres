@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS provenance_22; 
+
 CREATE TABLE provenance_22(
     record_identifier SMALLINT,
     change_type CHARACTER VARYING(1) NOT NULL,

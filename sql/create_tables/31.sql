@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS organisations_31; 
+
 CREATE TABLE organisations_31 (
     record_identifier SMALLINT,
     change_type CHARACTER VARYING(1) NOT NULL,

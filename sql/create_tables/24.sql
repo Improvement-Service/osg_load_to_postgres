@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS lpis_24; 
+
 CREATE TABLE lpis_24 (
     record_identifier SMALLINT,
     change_type CHARACTER VARYING(1) NOT NULL,

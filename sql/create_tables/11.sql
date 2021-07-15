@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS streets_11 CASCADE; 
+
 CREATE TABLE streets_11 (
     record_identifier SMALLINT,
     change_type CHARACTER VARYING(1) NOT NULL,

@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS maintenance_responsibilities_51; 
+
 CREATE TABLE maintenance_responsibilities_51 (
     record_identifier SMALLINT,
     change_type CHARACTER VARYING(1),

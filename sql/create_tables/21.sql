@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS blpus_21 CASCADE; 
+
 CREATE TABLE blpus_21 (
     record_identifier SMALLINT,
     change_type CHARACTER VARYING(1) NOT NULL,

@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS special_designations_53; 
+
 CREATE TABLE special_designations_53 (
     record_identifier SMALLINT,
     change_type CHARACTER VARYING(1),
