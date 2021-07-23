@@ -6,7 +6,7 @@ pg:
     port: 0000
     osg_schema: osg
     sg_schema: sg
-
+    tmp_schema: tmp
 
 api:
     host: www.test.com
@@ -14,5 +14,5 @@ api:
     user: api_user
     passwd: api_pass
 
-dirs:
-    in: ./in
+directories:
+    data_in: ./in

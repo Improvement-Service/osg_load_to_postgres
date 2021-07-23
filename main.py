@@ -53,25 +53,19 @@ def main():
     #sdtf_file.clean_up()
 
         # DB Config
-    db, live_schema, user, host, port = itemgetter('db', 'schema', 'user', 'host', 'port')(conf['pg'])
-    # User config in function then delete afterwards
-    #print(host, port, db, user)
-
-    #osg_db = sdtf2pg.OsgPsqlDbLoad(db, live_schema, user, host, port)
-
+    db, live_schema, tmp_schema, user, host, port = itemgetter('db', 'schema', 'tmp_schema', 'user', 'host', 'port')(conf['pg'])
+    #osg_db = sdtf2pg.OsgPsqlDbLoad(db, live_schema, temp_schema, user, sdtf_type, host, port)
     data_dir = sdtf_file.temp_dir
 
-    osg_db.sdtf2pg.OsgPsqlDbLoad()
-    
-    osg_db.create_temp_schema(sdtf_type)
-    osg_db.create_tables('sql/osg_create_tables.sql')
-    osg_db.load_csvs('sql/osg_load_data.sql', data_dir)
-    osg_db.add_columns()
+    # Create 
+    osg_db.create_temp_schema()
+    osg_db.psql_create_tables()
+    osg_db.psql_load_data(data_dir)
+    osg_db.psql_add_geom()
     osg_db.move_temp_to_live()
 
 
-    # host, port, db, user, schema, var
-    #create_psql_command()
+    # cleanup
 
 
 if __name__ == '__main__':
