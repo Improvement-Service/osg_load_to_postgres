@@ -3,10 +3,28 @@ import yaml
 import os
 from pathlib import Path, PurePath
 import zipfile
+import argparse
 
-def get_config(config_file):
+
+def get_input_arg():
+    #Variables from command line
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-t', '--type', choices=['a', 'e'], help='sdtf file type: (choose from:  a, e)', required=True)
+    args = parser.parse_args()
+    return args.type.upper()
+
+def get_config(config_file, sdtf_type):
+    """Simple config parsing from yml file"""
     with open(config_file, 'r') as file:
         config = yaml.safe_load(file)
+    # Add generic schema into config based on sdtf file type (A or E)
+    if sdtf_type.upper() in ['A', 'J']:
+        schema = config['pg']['osg_schema']
+    elif sdtf_type.upper() in ['E']:
+        schema = config['pg']['sg_schema']
+    else:
+        raise ValueError('SDTF file type unexpected, unable to determine which schema to use')
+    config['pg']['schema'] = schema
     return config
 
 class Utils():

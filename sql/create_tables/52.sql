@@ -16,7 +16,6 @@ CREATE TABLE reinstatement_categories_52 (
     start_date DATE,
     last_update_date DATE,
     end_date DATE,
-    geometry TEXT,
-    geom GEOMETRY(MultiLineString,27700)
+    geometry GEOMETRY(Geometry,27700)
 CONSTRAINT rein_fk_usrn FOREIGN KEY(usrn) REFERENCES streets_11(usrn)
 );

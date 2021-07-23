@@ -1,5 +1,6 @@
 import psycopg2
-
+import os
+    
 class OsgPsqlDbLoad(object):
     """
     Class to load previously split SDTF CSV file into a Postgresql datbase using psql COPY command.
@@ -12,75 +13,47 @@ class OsgPsqlDbLoad(object):
         tmp_schema (str): Name of the live schema within the db. Temp tables will be processed and dropped from here.
         user (str):  DB username .
         passwd (str):  DB password for user.
-        osg_split_csvs (lst):  CSV files, split from original SDTF by record_identifier. Will be loaded to db directly.
+        sdtf_type (str):  Type of SDTF file.  Will be used to determine what SQL files to run
         host (str):  Host of postgres db
-        port (str):  Port of postgres db
+        port (int):  Port of postgres db
         
     Attributes:
-        osg_table_ids (lst): List of table numbers in OSG spec. Used to validate CSV files.
-        
-        
-    #NumPy Style
-    Parameters
-    ---------
-    db_name : str
-        Name of postgres db
-    live_schema : str
-        Name of the live schema within the db.  Final tables will output here
-    tmp_schema : str
-        Name of the live schema within the db. Temp tables will be processed and dropped from here
-    user : str  
-        DB username
-    passwd : str
-        DB password for user
-    osg_split_csvs : list
-        CSV files, split from original SDTF by record_identifier. Will be loaded to db directly.
-    host : str
-        Host for postgres db
-    port : int 
-        Port for postgres db
-            
-    Attributes
-    ----------
-    osg_table_ids : list 
-        List of table numbers in OSG spec. Used to validate CSV files.
-    
+        sql_files (dict):  Dict of SQL files used in PSQL commands within class.  SQL files part of repo.    
     """
-    osg_table_ids = [
-                10,
-                11,
-                12,
-                13,
-                14,
-                15,
-                21,
-                22,
-                23,
-                24,
-                25,
-                26,
-                27,
-                29,
-                30,
-                31,
-                32,
-                51,
-                52,
-                53,
-                93,
-                99
-                ]    
+        
+    sql_files = {
+        'create': {
+            'osg': 'sql/osg_create_tables.sql', 
+            'sg': 'sql/sg_create_tables.sql'
+        },
+        'load': {
+            'osg': 'sql/osg_add_geometry.sql', 
+            'sg': 'sql/sg_add_geometry.sql'
+        },
+        'add_geom': {
+            'osg': 'sql/osg_add_geometry.sql', 
+            'sg': 'sql/sg_add_geometry.sql'
+        }
+    }
     
-    def __init__(self, db_name, live_schema, tmp_schema, user, passwd, 
-                 osg_split_csvs, host='localhost', port=5432):
+    def __init__(self, db_name, live_schema, tmp_schema, user, sdtf_type, 
+                 host='localhost', port=5432):
         self.db_name = db_name
         self.live_schema = live_schema
         self.tmp_schema = tmp_schema
         self.user = user
-        self.passwd = passwd
-        self.osg_split_csvs = osg_split_csvs
         self.host = host
         self.port = port
+        if sdtf_type.upper() in ['E', 'C']: 
+            self.gaz_type = 'sg'
+            self.create_sql = OsgPsqlDbLoad.sql_files['create']['sg']
+            self.load_sql = OsgPsqlDbLoad.sql_files['load']['sg']
+            self.add_geom_sql = OsgPsqlDbLoad.sql_files['add_geom']['sg']
+        else:
+            self.gaz_type = 'osg'
+            self.create_sql = OsgPsqlDbLoad.sql_files['create']['osg']
+            self.load_sql = OsgPsqlDbLoad.sql_files['load']['osg']
+            self.add_geom_sql = OsgPsqlDbLoad.sql_files['add_geom']['osg']
         
         #Validation of arguments.
         if  self.live_schema not in ['osg', 'osg_v4', 'sg', 'sg_v4']:
@@ -102,45 +75,68 @@ class OsgPsqlDbLoad(object):
         if any(char.isspace() for char in self.tmp_schema):
             raise ValueError('tmp_schema cannot contain whitespace')
 
-    def create_psql_command(self, sql_file: str):
-        cmd_str = 'psql -h {} -U {} -d {} -c \'set search_path = {}\' -af {}'.format(
+    def create_psql_command(self, sql_file: str, var_assign:dict = None):
+        cmd_str = 'psql -h {} -U {} -d {} -c \'set search_path = {}, public;\' -af {}'.format(
                 shlex.quote(self.host), 
                 shlex.quote(self.user), 
                 shlex.quote(self.db_name), 
                 shlex.quote(self.tmp_schema), 
                 shlex.quote(sql_file)
                 )
-        cmd_lst = shlex.split(cmd_str)
-        #cmd = subprocess.run(cmd_lst, capture_output=True, text=True, shell=True)
-        return cmd_lst
+        # Add variable assignment if this is added
+        if var_assignment is not None:
+            for k, v in var_assignment.items():
+                if  len(k.split(' ')) > 1 or len(v.split(' ')) > 1:
+                    raise ValueError('Variable assignment dict has whitespace. Not allowed for security')
+                cmd_str = cmd_str + ' -v ' + shlex.quote(f'{k}={v}')
+                
+        cmd_list = shlex.split(cmd_str)
+        #cmd = subprocess.run(cmd_list, capture_output=True, text=True, shell=True)
+        return cmd_list
+
+    def create_tmp_schema(self):
+        cmd_str = 'psql -h {host} -U {user} -d {db} -c \'DROP SCHEMA IF EXISTS {tmp}; CREATE SCHEMA {tmp};\''.format(
+                host=shlex.quote(self.host), 
+                user=shlex.quote(self.user), 
+                db=shlex.quote(self.db_name), 
+                tmp=shlex.quote(self.tmp_schema), 
+                )
+        cmd_list = shlex.split(cmd_str)
+        cmd = subprocess.run(cmd_lst, capture_output=True, text=True, shell=True)
+        return cmd
     
     def run_psql_command(self, cmd: list):
         cmd = subprocess.run(cmd_list, capture_output=True, text=True, shell=True)
         # Send output to logger
         return cmd
-            
-    def psql_copy_data(self, osg_split_csvs:list):
-        """
-        Use PSQL COPY command to load split SDTF files to Postgres database.  
-        Check to make sure split table name matches expected name structure.
-        """
-        for file in osg_split_csvs:
-            if file.split('/')[-1].split('\\')[-1].split('.')[0] not in osg_table_ids:
-                raise ValueError(
-                    'Unexpected SDTF split file name.  It should be in list of OSG table IDs.'
-            )
 
-        command = ''
-        command_list = shlex.split(shlex.quote(command))
-        return command_list
-        pass
+    def psql_create_tables(self):
+        """
+        Run PSQL on specific SQL file which uses PSQL COPY command to load split SDTF 
+        files to Postgres database.  Very specifically points to sql file.
+        """
+        command = create_psql_command(self.create_sql)
+        run_psql_command(command)
     
-    def build_constraints(self, sql_constraint_file:str):
+    def psql_load_data(self, temp_dir):
+        """
+        Run PSQL on specific SQL file which uses PSQL COPY command to load split SDTF 
+        files to Postgres database.  Very specifically points to sql file.
+        """
+        # get current working directory then change to temp data directory.
+        cwd = os.getcwd()
+        os.chdir(temp_dir)
+        command = create_psql_command(self.load_sql)
+        run_psql_command(command)
+        # Change directory back to old directory
+        os.chdir(cwd)
+
+    def psql_add_geom(self):
         """
         Use SQL file to build constraints on tables after load.
         """
-        pass
-    
+        command = create_psql_command(self.add_geom)
+        run_psql_command(command)    
     
     def create_tmp_schema(self):
         """
@@ -154,7 +150,7 @@ class OsgPsqlDbLoad(object):
         conn.close()
         return None
 
-    def tmp_schema_to_live(self):
+    def move_temp_to_live(self):
         """
         Move temp tables to live by renaming the schema and all tables within.
         """

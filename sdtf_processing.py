@@ -114,7 +114,7 @@ class SdtfProcessing(object):
     #     return tables_output     
     
     def split_by_record_id(self):
-                """
+        """
         Takes input file and splits input csv into multiple files based on first column. Input file is derived from 
         self.extracted_file
 
@@ -126,35 +126,32 @@ class SdtfProcessing(object):
         Returns:
             Sets self.file_list.
         """
-        file = open(self.extracted_file, 'r', encoding='utf-8-sig', newline='')
-    
-        # Regex for table_id.  Ignore others which don't match
+            # Regex for table_id.  Ignore others which don't match
         record_id_pattern = re.compile(r'\d\d\,')
         outputs = {}
         file_list = []
 
-        for line in file:
-            # Make sure table_id follows pattern
-            if re.match(record_id_pattern, line):
-                record_id = line.split(',')[0]
-                if not int(record_identifier) in self.osg_table_ids:
-                    raise ValueError('SDTF record identifier {} not in expected list'.format(record_identifier))
+        with open(self.extracted_file, 'r', encoding='utf-8-sig', newline='') as file:
+            for line in file:
+                # Make sure table_id follows pattern
+                if re.match(record_id_pattern, line):
+                    record_id = line.split(',')[0]
+                    if not int(record_id) in self.osg_table_ids:
+                        raise ValueError('SDTF record identifier {} not in expected list'.format(record_id))
+                
+                # Now write, add to existing writer or create new
+                if record_id in outputs.keys(): 
+                    outputs[record_id].write(line)
                 else:
-                    print(f'Warning, line does not start with record_identifier. Appended to previous file: \n{line}')
+                    output_file = os.path.join(self.temp_dir, '{}.csv'.format(record_id))
+                    outputs[record_id] = open(output_file, 'w', newline='\n', encoding='utf8')
+                    outputs[record_id].write(line)
+                    file_list.append(output_file)
+            # Close writers
+            for v in outputs.values():
+                v.close()
             
-            # Now write, add to existing writer or create new
-            if record_id in outputs.keys(): 
-                outputs[record_id].write(line)
-            else:
-                output_file = self.temp_dir + '/{}.csv'.format(record_id)
-                outputs[record_id] = open(output_file, 'w', newline='\n', encoding='utf8')
-                outputs[record_id].write(line)
-                file_list.append(output_file)
-        # Close writers
-        for v in outputs.values():
-            v.close()
-            
-        print('Output {num} files with table ids:{ids}'.format(num=len(outputs.values()), ids=outputs.values()))   
+        print('Output {num} with table ids :{file_ids}'.format(num=len(outputs.values()), file_ids=file_list))   
         self.temp_files = file_list
 
     def clean_up(self):

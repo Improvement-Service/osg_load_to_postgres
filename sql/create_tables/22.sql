@@ -10,9 +10,9 @@ CREATE TABLE provenance_22(
     provenance_code CHARACTER VARYING(1) NOT NULL,
     annotation CHARACTER VARYING(30) NOT NULL,
     entry_date DATE,
-    start_date DATE NOT NULL,
+    start_date DATE,
     end_date DATE,
-    last_update_date DATE NOT NULL,
-    successor_type BIGINT NOT NULL,
-CONSTRAINT prov_fk_uprn FOREIGN KEY(uprn) REFERENCES blpus_21(uprn)
+    last_update_date DATE
+--,
+--CONSTRAINT prov_fk_uprn FOREIGN KEY(uprn) REFERENCES blpus_21(uprn)
 );

@@ -4,6 +4,9 @@ pg:
     user: myuser
     db: mydb
     port: 0000
+    osg_schema: osg
+    sg_schema: sg
+
 
 api:
     host: www.test.com

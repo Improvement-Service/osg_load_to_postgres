@@ -13,10 +13,10 @@ CREATE TABLE blpus_21 (
     y_coordinate NUMERIC(9,2) NOT NULL,
     rpc SMALLINT NOT NULL,
     custodian_code SMALLINT,
-    start_date DATE NOT NULL,
+    start_date DATE,
     end_date DATE,
-    last_update_date DATE NOT NULL,
+    last_update_date DATE,
     entry_date DATE,
-    level NUMERIC(3,2),
+    level NUMERIC(3,1),
 CONSTRAINT blpus_pk PRIMARY KEY(uprn)
 );
