@@ -16,6 +16,6 @@ CREATE TABLE special_designations_53 (
     start_date DATE,
     last_update_date DATE,
     end_date DATE,
-    geometry GEOMETRY(Geometry,27700)
+    geometry GEOMETRY(Geometry),
 CONSTRAINT desig_fk_usrn FOREIGN KEY(usrn) REFERENCES streets_11(usrn)
 );

@@ -13,6 +13,6 @@ CREATE TABLE esus_13(
     start_date DATE,
     last_update_date DATE,
     end_date DATE,
-    geometry geometry(Geometry,27700),
+    geometry geometry(Geometry),
 CONSTRAINT esus_pk PRIMARY KEY(esu_id)
 );

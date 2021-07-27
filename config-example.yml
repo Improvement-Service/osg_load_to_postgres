@@ -7,6 +7,7 @@ pg:
     osg_schema: osg
     sg_schema: sg
     tmp_schema: tmp
+    read_user: myreaduser
 
 api:
     host: www.test.com
