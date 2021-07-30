@@ -1,8 +1,10 @@
 from operator import itemgetter
-import utils
-from osg_ftp import OsgFtp
-from sdtf_processing import SdtfProcessing
-from sdtf_db import OsgPsqlDbLoad
+import .utils
+from src.osg_ftp import OsgFtp
+from src.sdtf_processing import SdtfProcessing
+from src.sdtf_db import OsgPsqlDbLoad
+
+
 
 def main():
 

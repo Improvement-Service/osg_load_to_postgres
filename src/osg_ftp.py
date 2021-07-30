@@ -1,9 +1,6 @@
 from ftplib import FTP_TLS
 import socket
-
-#import sys
 from datetime import datetime
-#import csv
 import re
 import os
 
