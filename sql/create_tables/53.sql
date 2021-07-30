@@ -11,6 +11,7 @@ CREATE TABLE special_designations_53 (
     special_designation SMALLINT,
     whole_road SMALLINT,
     specific_location CHARACTER VARYING(250),
+    description CHARACTER VARYING(255),
     "state" SMALLINT,
     entry_date DATE,
     start_date DATE,

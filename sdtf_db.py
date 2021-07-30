@@ -2,6 +2,8 @@ import psycopg2
 import os
 import shlex
 import subprocess
+import re
+from psycopg2 import sql
     
 class OsgPsqlDbLoad(object):
     """
@@ -74,13 +76,17 @@ class OsgPsqlDbLoad(object):
             raise ValueError('db_name cannot contain whitespace')
         if any(char.isspace() for char in self.user):
             raise ValueError('user cannot contain whitespace')
+        if any(char.isspace() for char in self.read_user):
+            raise ValueError('user cannot contain whitespace')
         if any(char.isspace() for char in self.live_schema):
             raise ValueError('live_schema cannot contain whitespace')
         if any(char.isspace() for char in self.tmp_schema):
             raise ValueError('tmp_schema cannot contain whitespace')
 
     def create_psql_command(self, sql_file: str, var_assign:dict = None):
-        cmd_str = 'psql -h {} -U {} -d {} -c \'set search_path = {}, public;\' -af {}'.format(
+        cmd_str = """
+        psql -h {} -U {} -d {} -c \'set search_path = {}, public;\' -af {}
+        """.format(
                 shlex.quote(self.host), 
                 shlex.quote(self.user), 
                 shlex.quote(self.db_name), 
@@ -91,76 +97,96 @@ class OsgPsqlDbLoad(object):
         if var_assign is not None:
             for k, v in var_assign.items():
                 if  len(k.split(' ')) > 1 or len(v.split(' ')) > 1:
-                    raise ValueError('Variable assignment dict has whitespace. Not allowed for security')
+                    raise ValueError(
+                        'Variable dict has whitespace. Not allowed for security'
+                    )
                 cmd_str = cmd_str + ' -v ' + shlex.quote(f'{k}={v}')
                 
         cmd_list = shlex.split(cmd_str)
-        #cmd = subprocess.run(cmd_list, capture_output=True, text=True, shell=True)
         return cmd_list
 
     def run_psql_command(self, cmd_list: list):
-        cmd = subprocess.run(cmd_list, capture_output=True, text=True, shell=True)
+        cmd = subprocess.run(
+            cmd_list, capture_output=True, text=True, shell=True
+        )
         if cmd.returncode != 0:
             try:
                 cmd.check_returncode()
             except subprocess.CalledProcessError as exc:
-                print(f'The query failed and retured the following error: {cmd.stderr}')
+                print(f'The query failed and retured the error: {cmd.stderr}')
                 raise exc
+        if cmd.stderr is not None and cmd.stderr != '':
+            print(
+                f'Warning command args {cmd.args} produced stderr...: \n',
+                cmd.stderr
+            )
         # Send output to logger
-        return cmd
-        
-    def create_tmp_schema(self):
-        cmd_str = 'psql -h {host} -U {user} -d {db} -c \'DROP SCHEMA IF EXISTS {tmp} CASCADE;\
-                 CREATE SCHEMA {tmp};\''.format(
-                host=shlex.quote(self.host), 
-                user=shlex.quote(self.user), 
-                db=shlex.quote(self.db_name), 
-                tmp=shlex.quote(self.tmp_schema), 
-                )
-        cmd_list = shlex.split(cmd_str)
-        cmd = self.run_psql_command(command)
-        # cmd = subprocess.run(cmd_lst, capture_output=True, text=True, shell=True)
-        return cmd
-    
+        return cmd           
+
+    def psypg_query(self, sqlcmd: str, args=None):
+        """
+        Simple way to send through SQL queries to database.  Use this over PSQL
+        methods where possible. Note: all sql queries must be made safe with use 
+        of psycopg2.sql module to properly quote identifiers.
+        """
+        conn = psycopg2.connect(f"dbname={self.db_name} user={self.user}")
+        cur = conn.cursor()
+        if type(args) == tuple:
+            cur.execute(sqlcmd, args)
+        else:
+            cur.execute(sqlcmd)
+        conn.commit()
+        cur.close()
+        conn.close()
+        return None
+
+    def create_tmp_schema(self, filename):
+        """
+        Create temporary schema if it doesn't exist.
+        """     
+        print('Creating temporary schemal...')
+        sqlcmd = sql.SQL(
+            'DROP SCHEMA IF EXISTS {tmp} CASCADE; \
+            CREATE SCHEMA IF NOT EXISTS {tmp} AUTHORIZATION {reader}; \
+            COMMENT ON SCHEMA {tmp} IS %s;'
+        ).format(
+                tmp=sql.Identifier(self.tmp_schema),
+                reader=sql.Identifier(self.read_user)
+        )
+        # run sql query through psycoqg2, but add arguments (filename) as tuple.
+        self.psypg_query(sqlcmd, (filename,))
+
     def psql_create_tables(self):
         """
         Run PSQL on specific SQL file which uses PSQL to run a series of SQL files to create
         tables for OSG & Street Gaz schema.
         """
+        print('Creating OSG tables...')
         cmd_list = self.create_psql_command(self.create_sql)
         cmd = self.run_psql_command(cmd_list)
-        # cmd = subprocess.run(cmd_lst, capture_output=True, text=True, shell=True)
         return cmd
 
-    def psql_authorise_reader_user(self):
-        """
-        Authorise a user to select data from the tables.
-        """
-        cmd_str = 'psql -h {host} -U {user} -d {db} -c \
-                \'GRANT SELECT ON ALL TABLES IN SCHEMA {tmp} TO "{reader}";\''.format(
-                host=shlex.quote(self.host), 
-                user=shlex.quote(self.user), 
-                db=shlex.quote(self.db_name), 
-                tmp=shlex.quote(self.tmp_schema), 
-                reader=shlex.quote(self.read_user)
-                )
-        cmd_list = shlex.split(cmd_str)
-        cmd = self.run_psql_command(cmd_list)
-        # cmd = subprocess.run(cmd_lst, capture_output=True, text=True, shell=True)
-        return cmd
+    def authorise_reader_user(self):
+        sqlcmd = sql.SQL(
+            'GRANT SELECT ON ALL TABLES IN SCHEMA {} TO {};'
+        ).format(
+                sql.Identifier(self.tmp_schema),
+                sql.Identifier(self.read_user)
+        )
+        self.psypg_query(sqlcmd)
     
     def psql_load_data(self, temp_dir):
         """
         Run PSQL on specific SQL file which uses PSQL COPY command to load split SDTF 
         files to Postgres database.  Very specifically points to sql file.
         """
+        print('Beginning load into tables...')
         # get current working directory then change to temp data directory.
         self.load_sql = os.path.abspath(self.load_sql)
         cwd = os.getcwd()
         os.chdir(temp_dir)
         command = self.create_psql_command(self.load_sql)
         cmd = self.run_psql_command(command)
-        print(cmd)
         # Change directory back to old directory
         os.chdir(cwd)
         return cmd
@@ -169,35 +195,21 @@ class OsgPsqlDbLoad(object):
         """
         Use SQL file to build constraints on tables after load.
         """
-        command = create_psql_command(self.add_geom_sql)
-        run_psql_command(command)    
-    
-    def create_tmp_schema(self):
-        """
-        Create temporary schema if it doesn't exist.
-        """     
-        conn = psycopg2.connect(f"dbname={self.db_name} user={self.user}")
-        cur = conn.cursor()
-        cur.execute(
-                    f'DROP SCHEMA IF EXISTS {self.tmp_schema} CASCADE; \
-                    CREATE SCHEMA IF NOT EXISTS {self.tmp_schema} \
-                    AUTHORIZATION "{self.read_user}";'
-                    )
-        conn.commit()
-        cur.close()
-        conn.close()
-        return None
+        print('Altering geometry columns...')
+        command = self.create_psql_command(self.add_geom_sql)
+        cmd = self.run_psql_command(command)    
+        return cmd
 
     def move_temp_to_live(self):
         """
         Move temp tables to live by renaming the schema and all tables within.
-        """     
-        #sql = f'ALTER SCHEMA {self.temp_schema} RENAME TO {self.live_schema}'
-        conn = psycopg2.connect(f"dbname={self.db_name} user={self.user}")
-        cur = conn.cursor()
-        cur.execute(f'DROP SCHEMA {self.live_schema} CASCADE;')
-        cur.execute(f'ALTER SCHEMA {self.tmp_schema} RENAME TO {self.live_schema};')
-        conn.commit()
-        cur.close()
-        conn.close()
-        return None
+        """  
+        print('Replacing old schema tables with new...')   
+        sqlcmd = sql.SQL(
+            'DROP SCHEMA IF EXISTS {live} CASCADE; \
+            ALTER SCHEMA {tmp} RENAME TO {live};'
+        ).format(
+                live=sql.Identifier(self.live_schema),
+                tmp=sql.Identifier(self.tmp_schema)
+        )
+        self.psypg_query(sqlcmd)

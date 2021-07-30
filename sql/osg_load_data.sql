@@ -1,9 +1,6 @@
 /*SET THE CLIENT ENCODING*/
 \encoding UTF8
 
-/* :data_in variable is the folder where the split SDTF CSVs sit 
-e.g. data_in = in/9080_20210720_A_01         */
-
 /*LOAD THE DATA TO PostgreSQL USING "\COPY" META-COMMANDS*/
 \copy  header_10 FROM '10.csv' WITH (FORMAT csv, HEADER false);
 \copy streets_11 FROM '11.csv' WITH (FORMAT csv, HEADER false);

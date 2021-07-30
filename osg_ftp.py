@@ -47,10 +47,14 @@ class ExplicitTLS(object):
         self.client.close()
 
 
+class OsgFtp(ExplicitTLS):
 
-
-
-class DownloadNationalExtract(ExplicitTLS):
+    def __init__(self, host, port, user, passwd, sdtf_type, sdtf_version=4):
+        super().__init__(host, port, user, passwd)
+        self.sdtf_type = sdtf_type
+        self.sdtf_version = sdtf_version
+        self.latest_file = None
+        self.download_file = None
 
     #self = ExplicitTLS(host, port, user, passwd)
 
@@ -58,7 +62,7 @@ class DownloadNationalExtract(ExplicitTLS):
     #     super(ExplicitTLS, self).__init__(host, port, user, passwd)
     #     ftpes = ExplicitTLS(self.host, self.port, self.user, self.passwd)
 
-    def establish_secure_connection(self):
+    def establish_connection(self):
         self.setup()
         self.connect()
         self.login()
@@ -67,7 +71,7 @@ class DownloadNationalExtract(ExplicitTLS):
         for file_name in self.client.nlst():
             print(file_name)
 
-    def identify_most_recent_file(self, sdtf_type, sdtf_version=4):
+    def identify_latest_file(self):
         """(ftplib object) -> str
         Args:
             cleint (object):  object returned from ftplib
@@ -81,51 +85,53 @@ class DownloadNationalExtract(ExplicitTLS):
         >>>identify_most_recent_file_available_in_the_ftp_server(obj)
         None
         """
-      
         ## PROBLEM - multiple OSG export jobs can produce files of same name.  any bespoke export such as including mutliple LAs
         ## results in organisation code of Improvement Service (9080).   Therefore the only way to guaruntee the right file is processed
         ## is to set this script to run shortly after OSG export job has completed.
 
         # Determine which filename pattern to use based on sdtf verion (2 or 4) and type (A or E)
-        if str(sdtf_version) == '2' and sdtf_type.upper() == 'A':
+        if str(self.sdtf_version) == '2' and self.sdtf_type.upper() == 'A':
             re_test = re.compile('9080_\d{8}_A_01.zip')
-        elif str(sdtf_version) == '4' and sdtf_type.upper() == 'A':
+        elif str(self.sdtf_version) == '4' and self.sdtf_type.upper() == 'A':
             re_test = re.compile('9080_\d{8}_A_04.zip')
-        elif str(sdtf_version) == '2' and sdtf_type.upper() == 'E':
+        elif str(self.sdtf_version) == '2' and self.sdtf_type.upper() == 'E':
             re_test = re.compile('9080_\d{8}_E_01.zip')
-        elif str(sdtf_version) == '4' and sdtf_type.upper() == 'E':
+        elif str(self.sdtf_version) == '4' and self.sdtf_type.upper() == 'E':
             re_test = re.compile('9080_\d{8}_E_04.zip')
         else:
             re_test = None
-
-        # Build list of lists [file_date & filename]
-        files_dates = [[datetime.strptime(file_name.split('_')[1], '%Y%m%d').date(), file_name]\
+        # Build list of tuples (date, filename)
+        files_dates = [(datetime.strptime(file_name.split('_')[1], '%Y%m%d').date(), file_name)\
                        for file_name in self.client.nlst() if re_test.match(file_name)]
-
         #Identify the file which is the most recent using the files_dates list and return it as an output from this
         #function.
         if len(files_dates) > 0:
             # Sort by proper date in lists, then pull out proper name
-            most_recent_ftp_date = sorted(files_dates, key=lambda x: x[0], reverse=True)[0][1]
-            print("Latest file found:  " + str(most_recent_ftp_date))
+            self.latest_file = sorted(files_dates, key=lambda x: x[0], reverse=True)[0][1]
+            print("Latest file found:  " + str(self.latest_file))
         else:
-            most_recent_ftp_date = None
-            print("No file matching type: {} and version: {}".format(sdtf_type, sdtf_version))
+            self.latest_file = None
+            print("No file matching type: {} and version: {}".format(self.sdtf_type, self.sdtf_version))
+        return self.latest_file
 
-        return most_recent_ftp_date
-
-    def download_most_recent_file(self,file_name,download_folder):
+    def download_latest_file(self,download_folder):
 
         #An FTP RETR command needs to be used to download the identified file.
-        retr_command = f'RETR {file_name}'
+        retr_command = f'RETR {self.latest_file}'
         if not os.path.exists(download_folder):
             os.mkdir(download_folder)
 
         #This is where the file will be held.
-        download_file = download_folder + '\\' + file_name
+        self.download_file = download_folder + '/' + self.latest_file
 
-        with open(download_file, 'wb') as f:
+        with open(self.download_file, 'wb') as f:
             self.client.retrbinary(retr_command, f.write)
 
-        return download_file
+        return self.download_file
 
+    def delete_download_file(self):
+        try:
+            os.remove(self.download_file)
+            print(f'Deleted file: {self.download_file}')
+        except:
+            pass

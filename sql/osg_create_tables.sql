@@ -4,8 +4,10 @@
 /* STEP 2. CREATE THE ADDRESS BASE PREMIUM SCHEMA (ABP) */
 --CREATE SCHEMA IF NOT EXISTS OSG AUTHORIZATION "SISedit";
 
-/* STEP 3. SET THE SEARCH PATH TO INCLUDE THE ABP SCHEMA SO POSTGIS / POSTGRES FUNCTIONS AND SQL CAN BE USED */
---SET search_path TO osg;
+/* 
+Create tables from individual table definition.
+Schema should have been selected in prior command using SET search_path = xxxx
+ */
 
 \i sql/create_tables/10.sql;
 \i sql/create_tables/11.sql;

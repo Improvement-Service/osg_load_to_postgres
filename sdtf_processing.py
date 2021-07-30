@@ -160,6 +160,6 @@ class SdtfProcessing(object):
         utils.Utils.cleanup_safe(self.temp_dir)
         try:
             os.remove(self.extracted_file)
-            print(f'Deleted file: {str(f)}')
+            print(f'Deleted file: {self.extracted_file}')
         except:
             pass

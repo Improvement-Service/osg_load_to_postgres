@@ -15,5 +15,5 @@ CREATE TABLE metadata_29(
     state_code_scheme CHARACTER VARYING(40),
     gaz_date DATE,
     "language" CHARACTER VARYING(3),
-    character_set CHARACTER VARYING(4)
+    character_set TEXT
 );
