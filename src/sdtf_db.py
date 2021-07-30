@@ -27,16 +27,16 @@ class OsgPsqlDbLoad(object):
         
     sql_files = {
         'create': {
-            'osg': 'sql/osg_create_tables.sql', 
-            'sg': 'sql/sg_create_tables.sql'
+            'osg': 'src/sql/osg_create_tables.sql', 
+            'sg': 'src/sql/sg_create_tables.sql'
         },
         'load': {
-            'osg': 'sql/osg_load_data.sql', 
-            'sg': 'sql/sg_load_data.sql'
+            'osg': 'src/sql/osg_load_data.sql', 
+            'sg': 'src/sql/sg_load_data.sql'
         },
         'add_geom': {
-            'osg': 'sql/osg_add_geometry.sql', 
-            'sg': 'sql/sg_add_geometry.sql'
+            'osg': 'src/sql/osg_add_geometry.sql', 
+            'sg': 'src/sql/sg_add_geometry.sql'
         }
     }
     

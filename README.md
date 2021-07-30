@@ -1,6 +1,6 @@
 # OSG Load to Postgres DB
 
-Script to load an OSG SDTF v4 file to a Postgres Database.
+Script to load a [One Scotland Gazetter (OSG)](https://osg.scot) SDTF v4 file to a Postgres database.
 
 ---
 
@@ -12,6 +12,10 @@ This script relies on use of the [PSQL](https://www.postgresql.org/docs/13/app-p
 ### 2) OSG FTP Access - IP whitelist
 The script downloads the SDTF file from the OSG FTP site.  Access is restricted by IP address.  Check to make sure you have agreed access with the OSG custodians.  For example the Improvement Service SIS remote desktop IP has been whitelisted.
 
-### 3) Python package requirements
-Required Python packages are listed in the requirements.txt
+---
 
+# Usage:
+
+This script must be run from the root level of this project.  When run, a parameter must be passed to the script using the `-t` flag specifying which SDTF file type to load (_a or e_).  For example to load a type A file:
+
+```python ./src/main.py -t a```
