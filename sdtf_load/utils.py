@@ -9,9 +9,40 @@ import argparse
 def get_input_arg():
     #Variables from command line
     parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--type', choices=['a', 'e'], help='sdtf file type: (choose from:  a, e)', required=True)
+    parser.add_argument(
+        '-t', '--type', choices=['a', 'e'], help='SDTF file type: (choose from:  a, e)', 
+        required=True
+        )
+    parser.add_argument(
+        '-o', '--option', type=int, choices=[1, 2, 3, 4], 
+        help='Options.  Choose from...    \
+            {1}: download & load latest SDTF,   \
+            {2}: download latest SDTF,    \
+            {3}: load specific presplit SDTF,    \
+            {4}: split specific file', 
+        default = 1
+        )
+    parser.add_argument(
+        '-f', '--file', help='SDTF file name.  Only required if using \'option\' 3 (load) or 4 (split) on specific SDTF', 
+        required=False
+        )
+    parser.add_argument(
+        '-d', '--directory', help='Directory of SDTF files.  Only required if using \'option\' 3 (load)', 
+        required=False
+        )
     args = parser.parse_args()
-    return args.type.upper()
+    if args.option == 4 and args.file is None:
+        parser.error("--option requires --file if not to 4 (split SDTF).")
+    elif args.option == 3 and args.directory is None:
+        parser.error("--option requires --directory if set to 3 (load).")
+    elif args.option != 3 and args.file:
+        parser.error("--file is only required if using \'option\' 3 (load).")
+    elif args.option != 4 and args.directory:
+        parser.error("--directory is only required if using \'option\' 4 (split SDTF).")
+
+
+    # return args.type.upper()
+    return args #(args.type, args.option, args.file)
 
 def get_config(config_file, sdtf_type):
     """Simple config parsing from yml file"""

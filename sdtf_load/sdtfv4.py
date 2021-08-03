@@ -1,5 +1,3 @@
-
-
 class SdtfV4:
     """
     Test way of doing this with classes and inheritance.

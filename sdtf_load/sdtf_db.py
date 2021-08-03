@@ -24,19 +24,20 @@ class OsgPsqlDbLoad(object):
     Attributes:
         sql_files (dict):  Dict of SQL files used in PSQL commands within class.  SQL files part of repo.    
     """
-        
+    module_dir = os.path.abspath(os.path.dirname(__file__))
+
     sql_files = {
         'create': {
-            'osg': 'src/sql/osg_create_tables.sql', 
-            'sg': 'src/sql/sg_create_tables.sql'
+            'osg': 'sdtf_load/sql/osg_create_tables.sql', 
+            'sg': 'sdtf_load/sql/sg_create_tables.sql'
         },
         'load': {
-            'osg': 'src/sql/osg_load_data.sql', 
-            'sg': 'src/sql/sg_load_data.sql'
+            'osg': 'sdtf_load/sql/osg_load_data.sql', 
+            'sg': 'sdtf_load/sql/sg_load_data.sql'
         },
         'add_geom': {
-            'osg': 'src/sql/osg_add_geometry.sql', 
-            'sg': 'src/sql/sg_add_geometry.sql'
+            'osg': 'sdtf_load/sql/osg_add_geometry.sql', 
+            'sg': 'sdtf_load/sql/sg_add_geometry.sql'
         }
     }
     
@@ -60,7 +61,8 @@ class OsgPsqlDbLoad(object):
             self.create_sql = OsgPsqlDbLoad.sql_files['create']['osg']
             self.load_sql = OsgPsqlDbLoad.sql_files['load']['osg']
             self.add_geom_sql = OsgPsqlDbLoad.sql_files['add_geom']['osg']
-        
+        print(f'The module directory is.....  {OsgPsqlDbLoad.module_dir}')
+
         #Validation of arguments.
         if sdtf_type.upper() not in ['A', 'E']:
             raise ValueError('sdtf_type was not expected, should be "A" or "E".  Vale provided was:{sdtf_type})')
@@ -144,7 +146,7 @@ class OsgPsqlDbLoad(object):
         """
         Create temporary schema if it doesn't exist.
         """     
-        print('Creating temporary schemal...')
+        print('Creating temporary schema...')
         sqlcmd = sql.SQL(
             'DROP SCHEMA IF EXISTS {tmp} CASCADE; \
             CREATE SCHEMA IF NOT EXISTS {tmp} AUTHORIZATION {reader}; \
