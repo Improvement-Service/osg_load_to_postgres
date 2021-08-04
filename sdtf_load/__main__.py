@@ -13,62 +13,52 @@ proc_option = args.option
 download_file = args.file
 data_dir = args.directory
 
-
-
 # Configuration - see config.yml. Follow structure in config-example.yml
 conf = utils.get_config('./config.yml', sdtf_type)
 in_dir = conf['directories']['data_in']
 
-
-
+#### FTP DOWNLOAD ####
 if proc_option in (1,2):
-    pass
-    # # # #### FTP DOWNLOAD ####
-    # # # # Connect to the FTP site and download the most recent file of right SDTF type.
-    # # # FTP config
-    # host, port, user, passwd = itemgetter('host', 'port', 'user', 'passwd')(conf['ftp'])
+    # FTP config
+    host, port, user, passwd = itemgetter(
+        'host', 'port', 'user', 'passwd'
+    )(conf['ftp'])
 
-    # osgftp = OsgFtp(host, port, user, passwd, sdtf_type)
-    # osgftp.establish_connection()
-    # osgftp.identify_latest_file()
-    # download_file = osgftp.download_latest_file(in_dir)
+    osgftp = OsgFtp(host, port, user, passwd, sdtf_type)
+    osgftp.establish_connection()
+    osgftp.identify_latest_file()
+    osgftp.download_latest_file(in_dir)
+    download_file = osgftp.download_file
 
-    # # # ### Temp values for split testing
-    # # download_file = 'data_in/9080_20210727_E_04zip'
-    # # download_file = osgftp.download_file
-
-if proc_option in (1,4):
-    pass
-    # ### DATA PREP ###
-    # # Create child folder, unzip and split file into component tables
-    # sdtf = SdtfProcessing(download_file)
-    # sdtf.unzip_sdtf()
-    # sdtf.create_folder()
-    # sdtf.split_by_record_id()
-    # data_dir = sdtf.temp_dir
-
+### DATA PREP ###
 if proc_option in (1,3):
-    pass
-    # ###  DB load ###
-    # # data_dir = 'data_in/9080_20210727_E_04'
+    # Create child folder, unzip and split file into component tables
+    sdtf = SdtfProcessing(download_file)
+    sdtf.unzip_sdtf()
+    sdtf.create_folder()
+    sdtf.split_by_record_id()
+    data_dir = sdtf.temp_dir
 
-    # # DB Config
-    # db, live_schema, tmp_schema, user, read_user, host, port = itemgetter(
-    #     'db', 'schema', 'tmp_schema', 'user', 'read_user', 'host', 'port'
-    # )(conf['pg'])
-    # osg_db = OsgPsqlDbLoad(
-    #     db, live_schema, tmp_schema, user, sdtf_type, read_user, host, port
-    # )
-    # # Create schema and add comment of filename
-    # osg_db.create_tmp_schema(sdtf.filename)
-    # osg_db.psql_create_tables()
-    # osg_db.authorise_reader_user()
-    # osg_db.psql_load_data(data_dir)
-    # osg_db.psql_add_geom()
-    # osg_db.move_temp_to_live()
+###  DB load ###
+if proc_option in (1,4):
+    # DB Config
+    db, live_schema, tmp_schema, user, read_user, host, port = itemgetter(
+        'db', 'schema', 'tmp_schema', 'user', 'read_user', 'host', 'port'
+    )(conf['pg'])
 
+    osg_db = OsgPsqlDbLoad(
+        db, live_schema, tmp_schema, user, sdtf_type, read_user, host, port
+    )
+    # Create schema and add comment of filename
+    osg_db.create_tmp_schema(data_dir)
+    osg_db.psql_create_tables()
+    osg_db.authorise_reader_user()
+    osg_db.psql_load_data(data_dir)
+    osg_db.psql_add_geom()
+    osg_db.move_temp_to_live()
 
+### cleanup ###
 if proc_option in (1,):
-# ### cleanup ###
-    # sdtf.clean_up()
-    # osgftp.delete_download_file()
+
+    sdtf.clean_up()
+    osgftp.delete_download_file()

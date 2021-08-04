@@ -18,8 +18,8 @@ def get_input_arg():
         help='Options.  Choose from...    \
             {1}: download & load latest SDTF,   \
             {2}: download latest SDTF,    \
-            {3}: load specific presplit SDTF,    \
-            {4}: split specific file', 
+            {3}: split specific file,    \
+            {4}: load specific presplit SDTF', 
         default = 1
         )
     parser.add_argument(
@@ -31,14 +31,14 @@ def get_input_arg():
         required=False
         )
     args = parser.parse_args()
-    if args.option == 4 and args.file is None:
-        parser.error("--option requires --file if not to 4 (split SDTF).")
-    elif args.option == 3 and args.directory is None:
-        parser.error("--option requires --directory if set to 3 (load).")
+    if args.option == 4 and args.directory is None:
+        parser.error("--option requires --directory if set to 4 (load).")
+    elif args.option == 3 and args.file is None:
+        parser.error("--option requires --file if set to 3 (split SDTF).")
     elif args.option != 3 and args.file:
-        parser.error("--file is only required if using \'option\' 3 (load).")
+        parser.error("--file is only required if using \'option\' 3 (split SDTF).")
     elif args.option != 4 and args.directory:
-        parser.error("--directory is only required if using \'option\' 4 (split SDTF).")
+        parser.error("--directory is only required if using \'option\' 4 (load).")
 
 
     # return args.type.upper()
