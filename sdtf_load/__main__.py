@@ -1,9 +1,9 @@
 import os
 from operator import itemgetter
-import osg_load.utils as utils
-from osg_load.osg_ftp import OsgFtp
-from osg_load.sdtf_processing import SdtfProcessing
-from osg_load.sdtf_db import OsgPsqlDbLoad
+import sdtf_load.utils as utils
+from sdtf_load.osg_ftp import OsgFtp
+from sdtf_load.sdtf_processing import SdtfProcessing
+from sdtf_load.sdtf_db import OsgPsqlDbLoad
 
 #### CONFIG ####
 # SDTF file type to process

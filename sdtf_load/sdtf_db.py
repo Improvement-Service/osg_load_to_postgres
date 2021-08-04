@@ -33,7 +33,7 @@ class OsgPsqlDbLoad(object):
             'sg': os.path.join(parent_dir, 'sql/sg_create_tables.sql')
         },
         'load': {
-            'osg': os.path.join(parent_dir, 'sql/osg_load_data.sql'), 
+            'osg': os.path.join(parent_dir, 'sql/sdtf_load_data.sql'), 
             'sg': os.path.join(parent_dir, 'sql/sg_load_data.sql')
         },
         'add_geom': {

@@ -1,8 +1,9 @@
+import os
 from operator import itemgetter
-import .utils
-from src.osg_ftp import OsgFtp
-from src.sdtf_processing import SdtfProcessing
-from src.sdtf_db import OsgPsqlDbLoad
+import sdtf_load.utils as utils
+from sdtf_load.osg_ftp import OsgFtp
+from sdtf_load.sdtf_processing import SdtfProcessing
+from sdtf_load.sdtf_db import OsgPsqlDbLoad
 
 
 
@@ -14,7 +15,12 @@ def main():
     sdtf_type = utils.get_input_arg()
 
     # Configuration - see config.yml. Follow structure in config-example.yml
-    conf = utils.get_config('./config.yml', sdtf_type)
+    conf = utils.get_config(
+        os.path.join(
+            os.path.dirname(__file__),
+            'config.yml'
+        ), sdtf_type
+    )
     in_dir = conf['directories']['data_in']
    
 
