@@ -18,4 +18,11 @@ The script downloads the SDTF file from the OSG FTP site.  Access is restricted 
 
 This script must be run from the root level of this project.  When run, a parameter must be passed to the script using the `-t` flag specifying which SDTF file type to load (_a or e_).  For example to load a type A file:
 
-```python ./src/main.py -t a```
+```python ./osg_load/main.py -t a```
+
+```
+cd <repository root> 
+python -m osg_load -t a
+```
+
+NOTE: this package must be run from the repository root in order to acces the relevant config and sql files.

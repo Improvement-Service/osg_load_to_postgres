@@ -24,19 +24,21 @@ class OsgPsqlDbLoad(object):
     Attributes:
         sql_files (dict):  Dict of SQL files used in PSQL commands within class.  SQL files part of repo.    
     """
-        
+    
+    parent_dir = os.path.dirname(__file__)
+
     sql_files = {
         'create': {
-            'osg': 'src/sql/osg_create_tables.sql', 
-            'sg': 'src/sql/sg_create_tables.sql'
+            'osg': os.path.join(parent_dir, 'sql/osg_create_tables.sql'), 
+            'sg': os.path.join(parent_dir, 'sql/sg_create_tables.sql')
         },
         'load': {
-            'osg': 'src/sql/osg_load_data.sql', 
-            'sg': 'src/sql/sg_load_data.sql'
+            'osg': os.path.join(parent_dir, 'sql/osg_load_data.sql'), 
+            'sg': os.path.join(parent_dir, 'sql/sg_load_data.sql')
         },
         'add_geom': {
-            'osg': 'src/sql/osg_add_geometry.sql', 
-            'sg': 'src/sql/sg_add_geometry.sql'
+            'osg': os.path.join(parent_dir, 'sql/osg_add_geometry.sql'), 
+            'sg': os.path.join(parent_dir, 'sql/sg_add_geometry.sql')
         }
     }
     

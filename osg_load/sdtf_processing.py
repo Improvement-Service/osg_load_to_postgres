@@ -1,4 +1,4 @@
-import utils as utils
+import osg_load.utils as utils
 import csv
 import os
 import itertools

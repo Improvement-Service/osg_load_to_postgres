@@ -1,33 +1,38 @@
+import os
 from operator import itemgetter
-from src.utils import utils
-from src.osg_ftp import OsgFtp
-from src.sdtf_processing import SdtfProcessing
-from src.sdtf_db import OsgPsqlDbLoad
+import osg_load.utils as utils
+from osg_load.osg_ftp import OsgFtp
+from osg_load.sdtf_processing import SdtfProcessing
+from osg_load.sdtf_db import OsgPsqlDbLoad
 
 #### CONFIG ####
 # SDTF file type to process
 sdtf_type = utils.get_input_arg()
 
 # Configuration - see config.yml. Follow structure in config-example.yml
-conf = utils.get_config('./config.yml', sdtf_type)
+conf = utils.get_config(
+    os.path.join(
+        os.path.dirname(os.path.dirname(__file__)),
+        'config.yml'
+    ), sdtf_type
+)
+
 in_dir = conf['directories']['data_in']
 
 
-
-# # #### FTP DOWNLOAD ####
-# # # Connect to the FTP site and download the most recent file of right SDTF type.
-# # FTP config
+# #### FTP DOWNLOAD ####
+# # Connect to the FTP site and download the most recent file of right SDTF type.
+# FTP config
 host, port, user, passwd = itemgetter('host', 'port', 'user', 'passwd')(conf['ftp'])
-print(host, port, user, passwd)
 # FTP object
 osgftp = OsgFtp(host, port, user, passwd, sdtf_type)
 osgftp.establish_connection()
 osgftp.identify_latest_file()
-download_file = osgftp.download_latest_file(in_dir)
+osgftp.download_latest_file(in_dir)
 
-# # ### Temp values for split testing
+download_file = osgftp.download_file
 # download_file = 'data_in/9080_20210727_E_04zip'
-# download_file = osgftp.download_file
+
 
 ### DATA PREP ###
 # Create child folder, unzip and split file into component tables
@@ -37,17 +42,16 @@ sdtf.unzip_sdtf()
 sdtf.create_folder()
 sdtf.split_by_record_id()
 
-### Prep for DB load ###
 data_dir = sdtf.temp_dir
 # data_dir = 'data_in/9080_20210727_E_04'
 
+
+### DB LOAD ###
 # DB Config
 db, live_schema, tmp_schema, user, read_user, host, port = itemgetter(
     'db', 'schema', 'tmp_schema', 'user', 'read_user', 'host', 'port'
 )(conf['pg'])
-print(db, live_schema, tmp_schema, user, read_user, host, port)
 # DB Processing 
-
 osg_db = OsgPsqlDbLoad(
     db, live_schema, tmp_schema, user, sdtf_type, read_user, host, port
 )
@@ -60,6 +64,6 @@ osg_db.psql_add_geom()
 osg_db.move_temp_to_live()
 
 
-# cleanup
+### cleanup ###
 sdtf.clean_up()
 osgftp.delete_download_file()
