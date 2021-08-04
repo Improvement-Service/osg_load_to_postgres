@@ -1,9 +1,12 @@
-CREATE TABLE osg_v4.header_10(
+DROP TABLE IF EXISTS header_10; 
+
+
+CREATE TABLE header_10(
     record_identifier SMALLINT,
     custodian_name TEXT,
     custodian_code INTEGER,
     process_date DATE,
-    volume_number INTEGER,
+    volume_number SMALLINT,
     entry_date DATE,
     time_stamp TIME WITHOUT TIME ZONE,
     dtf_version NUMERIC(3,2),

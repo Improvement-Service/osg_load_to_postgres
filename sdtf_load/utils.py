@@ -2,44 +2,30 @@ import configparser
 import yaml
 import os
 from pathlib import Path, PurePath
+import zipfile
+import argparse
 
-def get_config(config_file):
+
+def get_input_arg():
+    #Variables from command line
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-t', '--type', choices=['a', 'e'], help='sdtf file type: (choose from:  a, e)', required=True)
+    args = parser.parse_args()
+    return args.type.upper()
+
+def get_config(config_file, sdtf_type):
+    """Simple config parsing from yml file"""
     with open(config_file, 'r') as file:
         config = yaml.safe_load(file)
+    # Add generic schema into config based on sdtf file type (A or E)
+    if sdtf_type.upper() in ['A', 'J']:
+        schema = config['pg']['osg_schema']
+    elif sdtf_type.upper() in ['E']:
+        schema = config['pg']['sg_schema']
+    else:
+        raise ValueError('SDTF file type unexpected, unable to determine which schema to use')
+    config['pg']['schema'] = schema
     return config
-
-
-def get_db_config(config_file):
-    config = configparser.ConfigParser()
-    config.read(config_file)
-    db_config = {
-        'host': config.get('pg', 'host'),
-        'port': config.get('pg', 'port'),
-        'user': config.get('pg', 'user'),
-        'db': config.get('pg', 'db'),
-        'port': config.getint('pg','port')
-        }
-    return db_config
-
-def get_ftp_config(config_file):
-    config = configparser.ConfigParser()
-    config.read(config_file)
-    ftp_config = {
-        'host': config.get('ftp','host'),
-        'port': config.getint('ftp','port'),
-        'user': config.get('ftp', 'user'),
-        'passwd': config.get('ftp', 'passwd')
-        }
-    return ftp_config
-
-def get_dir_config(config_file):
-    config = configparser.ConfigParser()
-    config.read(config_file)
-    dir_config = {
-        'in': config.get('dirs','in')
-        }
-    return dir_config
-
 
 class Utils():
     
@@ -68,6 +54,15 @@ class Utils():
         else:
             print(f'Child directory already existed at:  {child_dir}')
         return str(child_dir)    
+
+    
+    def unzip_file(zipped_file, extract_folder=None):
+
+        with zipfile.ZipFile(zipped_file, "r") as to_unzip:
+            to_unzip.extractall(extract_folder)
+            extracted = to_unzip.namelist()
+        to_unzip.close()
+        return extracted
     
     def cleanup_safe(directory: str) -> None:
         """Delete all CSV & ZIP files in directory and directory itself. NOT recursive"""

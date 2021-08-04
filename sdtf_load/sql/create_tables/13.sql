@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS esus_13 CASCADE; 
+
 CREATE TABLE esus_13(
     record_identifier SMALLINT,
     change_type CHARACTER VARYING(1),
@@ -11,7 +13,6 @@ CREATE TABLE esus_13(
     start_date DATE,
     last_update_date DATE,
     end_date DATE,
-    geometry TEXT,
-    geom GEOMETRY(LineString,27700)
+    geometry geometry(Geometry),
 CONSTRAINT esus_pk PRIMARY KEY(esu_id)
 );

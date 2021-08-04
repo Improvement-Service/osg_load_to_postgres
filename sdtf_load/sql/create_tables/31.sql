@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS organisations_31; 
+
 CREATE TABLE organisations_31 (
     record_identifier SMALLINT,
     change_type CHARACTER VARYING(1) NOT NULL,
@@ -10,6 +12,7 @@ CREATE TABLE organisations_31 (
     end_date DATE,
     entry_date DATE,
     last_update_date DATE NOT NULL,
-CONSTRAINT orgs_pk PRIMARY KEY(org_key),
-CONSTRAINT org_fk_uprn FOREIGN KEY(uprn) REFERENCES blpus_21(UPRN)
+CONSTRAINT orgs_pk PRIMARY KEY(org_key)
+--,
+--CONSTRAINT org_fk_uprn FOREIGN KEY(uprn) REFERENCES blpus_21(UPRN)
 );

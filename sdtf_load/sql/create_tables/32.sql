@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS blpu_classifications_32; 
+
 CREATE TABLE blpu_classifications_32 (
     record_identifier SMALLINT,
     change_type CHARACTER VARYING(1) NOT NULL,

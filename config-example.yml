@@ -4,12 +4,16 @@ pg:
     user: myuser
     db: mydb
     port: 0000
+    osg_schema: osg
+    sg_schema: sg
+    tmp_schema: tmp
+    read_user: myreaduser
 
-api:
+ftp:
     host: www.test.com
     port: 0000
     user: api_user
     passwd: api_pass
 
-dirs:
-    in: ./in
+directories:
+    data_in: ./in

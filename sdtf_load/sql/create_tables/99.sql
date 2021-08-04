@@ -1,4 +1,6 @@
-CREATE TABLE header_10(
+DROP TABLE IF EXISTS trailer_99; 
+
+CREATE TABLE trailer_99(
     record_identifier SMALLINT,
     next_volume_number SMALLINT,
     record_count BIGINT,

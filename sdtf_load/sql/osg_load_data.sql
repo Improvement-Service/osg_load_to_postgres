@@ -2,7 +2,7 @@
 \encoding UTF8
 
 /*LOAD THE DATA TO PostgreSQL USING "\COPY" META-COMMANDS*/
-\copy header_10 FROM '10.csv' WITH (FORMAT csv, HEADER false);
+\copy  header_10 FROM '10.csv' WITH (FORMAT csv, HEADER false);
 \copy streets_11 FROM '11.csv' WITH (FORMAT csv, HEADER false);
 \copy esus_13 FROM '13.csv' WITH (FORMAT csv, HEADER false);
 \copy street_descriptions_15 FROM '15.csv' WITH (FORMAT csv, HEADER false);

@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS special_designations_53; 
+
 CREATE TABLE special_designations_53 (
     record_identifier SMALLINT,
     change_type CHARACTER VARYING(1),
@@ -9,12 +11,12 @@ CREATE TABLE special_designations_53 (
     special_designation SMALLINT,
     whole_road SMALLINT,
     specific_location CHARACTER VARYING(250),
+    description CHARACTER VARYING(255),
     "state" SMALLINT,
     entry_date DATE,
     start_date DATE,
     last_update_date DATE,
     end_date DATE,
-    geometry TEXT,
-    geom GEOMETRY(MultiLineString,27700)
+    geometry GEOMETRY(Geometry),
 CONSTRAINT desig_fk_usrn FOREIGN KEY(usrn) REFERENCES streets_11(usrn)
 );

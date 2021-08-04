@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS lpis_24; 
+
 CREATE TABLE lpis_24 (
     record_identifier SMALLINT,
     change_type CHARACTER VARYING(1) NOT NULL,
@@ -26,7 +28,8 @@ CREATE TABLE lpis_24 (
     postcode CHARACTER VARYING(8),
     post_town CHARACTER VARYING(30),
     official_flag CHARACTER VARYING(1),
-CONSTRAINT lpis_pk PRIMARY KEY(lpi_key),
-CONSTRAINT lpis_fk_uprn FOREIGN KEY(uprn) REFERENCES blpus_21(uprn),
-CONSTRAINT lpis_fk_ursn FOREIGN KEY(usrn) REFERENCES streets_11(usrn)
+CONSTRAINT lpis_pk PRIMARY KEY(lpi_key)
+--,
+--CONSTRAINT lpis_fk_uprn FOREIGN KEY(uprn) REFERENCES blpus_21(uprn),
+--CONSTRAINT lpis_fk_ursn FOREIGN KEY(usrn) REFERENCES streets_11(usrn)
 );
