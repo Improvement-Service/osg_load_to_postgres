@@ -17,6 +17,10 @@ venv.bak/
 
 # PyCharm
 
+# Log files & batch files
+*.log
+*.bat
+
 
 # Config
 config.ini
